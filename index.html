@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Governed Agentic AI for SOC Alert Triage</title>
+<meta name="description" content="Group 6 project, MBA (IT Business Management), SCIT Pune: a governed multi-agent assistant for Tier 1 SOC alert triage. AI prepares, a human decides, every step is checked and logged.">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#14212e;--mute:#556473;--line:#d6dde5;--navy:#0b1f33;--teal:#0f8b8d;--a:#2e9e6b;--h:#e0a030;--e:#d1495b;--sky:#e1eef3}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1620;--card:#142130;--ink:#e6edf3;--mute:#9db0c1;--line:#26384a;--navy:#07121c;--sky:#16313b}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--teal)}img{max-width:100%;height:auto;display:block}
+header.hero{background:var(--navy);color:#fff;padding:56px 20px 44px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.hero h1{font-size:clamp(28px,5vw,46px);line-height:1.15;margin:0 0 12px}
+.hero p.sub{color:#a9bccd;font-size:18px;margin:0 0 24px;max-width:760px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.chip{padding:10px 18px;border-radius:999px;font-weight:700;color:#fff;font-size:15px;letter-spacing:.03em}
+.chip.a{background:var(--a)}.chip.h{background:var(--h)}.chip.t{background:var(--teal)}.arrow{color:#a9bccd}
+.meta{margin-top:26px;color:#a9bccd;font-size:14px}
+nav{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);z-index:5}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:6px;padding-bottom:6px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--mute);padding:6px 10px;border-radius:6px;font-size:14px}
+nav a:hover{background:var(--sky);color:var(--ink)}
+section{padding:44px 0 8px}
+h2{font-size:26px;margin:0 0 6px}
+h2+p.lead{color:var(--mute);margin:0 0 20px}
+h3{font-size:18px;margin:26px 0 8px}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.card h4{margin:0 0 6px;font-size:16px}.card p{margin:0;color:var(--mute);font-size:15px}
+.card.acc{border-left:5px solid var(--teal)}.card.warn{border-left:5px solid var(--e)}.card.ok{border-left:5px solid var(--a)}
+.tag{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;color:#fff;margin-right:6px}
+.tag.a{background:var(--a)}.tag.h{background:var(--h)}.tag.e{background:var(--e)}.tag.t{background:var(--teal)}
+figure{margin:18px 0}figcaption{color:var(--mute);font-size:14px;margin-top:6px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.scroll img{min-width:1500px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:15px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--sky)}tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.flow span.s{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600}
+.flow span.x{color:var(--teal);font-weight:700}
+.banner{background:var(--navy);color:#fff;border-radius:10px;padding:18px 20px;font-weight:700;margin:20px 0}
+ul.tight{margin:6px 0 0 18px;padding:0}ul.tight li{margin:3px 0}
+.note{color:var(--mute);font-size:14px}
+.todo{border:2px dashed var(--h);border-radius:10px;padding:18px;background:var(--card)}
+footer{margin-top:56px;background:var(--navy);color:#a9bccd;padding:28px 0;font-size:14px}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <h1>Governed Agentic AI for SOC Alert Triage and Incident Investigation</h1>
+  <p class="sub">A multi-agent assistant that prepares the evidence for a security analyst, while a person makes every consequential decision. Group 6, MBA (IT Business Management), Symbiosis Centre for Information Technology, Pune.</p>
+  <div class="chips"><span class="chip a">AI PREPARES</span><span class="arrow">&#10140;</span><span class="chip h">HUMAN DECIDES</span><span class="arrow">&#10140;</span><span class="chip t">CHECKED &amp; LOGGED</span></div>
+  <p class="meta">Faculty mentor: Anshul Saxena, PhD &middot; Prototype on synthetic data &middot; A design pattern, not a production product</p>
+</div></header>
+
+<nav><div class="wrap">
+  <a href="#overview">Overview</a><a href="#problem">Problem</a><a href="#asis">Today</a><a href="#tobe">Proposal</a><a href="#architecture">Architecture</a><a href="#governance">Governance</a><a href="#prototype">Prototype</a><a href="#evaluation">Evaluation</a><a href="#expert">Expert</a><a href="#after">After the interview</a><a href="#limits">Limits</a><a href="#demo">Demo &amp; links</a><a href="#team">Team</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="overview">
+  <h2>Overview</h2>
+  <p class="lead">What this project is, in one minute.</p>
+  <p>In a Security Operations Centre (SOC), Tier 1 analysts spend much of their effort collecting and correlating evidence before they can judge an alert. We asked one question: <strong>how can that manual effort be reduced without giving AI unsafe control over security decisions?</strong></p>
+  <p>Our answer is a governed assistant. An alert arrives, sensitive names are masked, a transparent rule score is worked out, and five single-purpose AI agents prepare the case. Ordinary code checks every answer. Rules route the case. A person reads the evidence, decides and must write a reason. Every step goes into an append-only audit log.</p>
+  <div class="grid g3">
+    <div class="card acc"><h4>Scope</h4><p>Tier 1 first-pass triage only. Tier 2 investigation appears in the process model but is outside the prototype.</p></div>
+    <div class="card acc"><h4>Autonomy</h4><p>The system recommends and never acts. No containment or response tool exists in it.</p></div>
+    <div class="card acc"><h4>Data and models</h4><p>All data is synthetic. Three open models (Llama 3.1 8B, Qwen3 8B, Mistral 7B) run locally.</p></div>
+  </div>
+</section>
+
+<section id="problem">
+  <h2>The problem</h2>
+  <p class="lead">Analysts assemble evidence before they can decide.</p>
+  <div class="grid g4">
+    <div class="card"><h4>High alert volume</h4></div><div class="card"><h4>Fragmented evidence</h4></div><div class="card"><h4>Manual investigation</h4></div><div class="card"><h4>Tool switching</h4></div>
+    <div class="card"><h4>Asset and context dependency</h4></div><div class="card"><h4>Analyst judgement</h4></div><div class="card"><h4>Escalation and hand-off effort</h4></div>
+  </div>
+  <p class="note" style="margin-top:14px">A 2026 Microsoft and Omdia survey reports that about a fifth of the working week is lost to aggregating and correlating information, about 46% of alerts are false positives and about 42% are never investigated. The survey was commissioned by a vendor, so we treat these figures as indicative, not as proof, and they are not our own measurements.</p>
+</section>
+
+<section id="asis">
+  <h2>How triage works today (AS-IS)</h2>
+  <p class="lead">Our BPMN 2.0 model: five lanes and an external regulator pool, from detection to closure.</p>
+  <figure>
+    <div class="scroll"><img src="img/as_is.jpg" alt="AS-IS BPMN model of SOC alert triage with five lanes and a regulator pool"></div>
+    <figcaption>AS-IS process. Scroll sideways to read it, or <a href="img/as_is.jpg" target="_blank" rel="noopener">open it full size</a>. Markers: D1 to D8 delays, B1 to B7 bottlenecks, X1 to X10 exceptions, eight data stores.</figcaption>
+  </figure>
+  <h3>Where it breaks down</h3>
+  <ul class="tight">
+    <li>Manual evidence collection, manual correlation and repeated threat-intelligence lookups.</li>
+    <li>Waiting for the asset owner, switching between consoles, queues where alerts age out.</li>
+    <li>Hand-offs and approvals, dependence on experienced analysts, hand-written documentation.</li>
+  </ul>
+  <div class="banner">Core problem: the analyst spends significant effort preparing evidence before making the decision.</div>
+</section>
+
+<section id="tobe">
+  <h2>The proposal (TO-BE)</h2>
+  <p class="lead">Every one of the 25 tasks is marked <span class="tag a">A</span> autonomous (13), <span class="tag h">H</span> human in the loop (8) or <span class="tag e">E</span> escalation (4).</p>
+  <figure>
+    <div class="scroll"><img src="img/to_be.jpg" alt="TO-BE BPMN model with tasks marked A, H and E"></div>
+    <figcaption>TO-BE process. <a href="img/to_be.jpg" target="_blank" rel="noopener">Open full size</a>.</figcaption>
+  </figure>
+  <div class="banner">We are not automating the security decision. We are automating the preparation required before the decision.</div>
+  <h3>The five agents</h3>
+  <div class="tw"><table>
+    <tr><th>Agent</th><th>Replaces</th><th>What it does</th></tr>
+    <tr><td>Alert Correlation</td><td>Manual log collection and correlation</td><td>Groups related events and states why</td></tr>
+    <tr><td>Threat Intelligence</td><td>Manual lookups</td><td>Interprets lookups, or reports the source as unavailable (which blocks deprioritisation)</td></tr>
+    <tr><td>Asset Context</td><td>Asset and owner queries</td><td>Criticality, owner, privileges; a missing record is shown as unknown</td></tr>
+    <tr><td>Risk and Prioritisation</td><td>Manual prioritisation</td><td>Runs three times; proposes a band and one action from a list of nine; may only add caution to the rule score</td></tr>
+    <tr><td>Incident Summary</td><td>Hand-written case notes</td><td>Short summary with findings linked to evidence, unknowns and confidence</td></tr>
+  </table></div>
+  <p class="note" style="margin-top:10px">The human decision stays human. The analyst or lead approves, rejects, dismisses or escalates, and always writes a reason.</p>
+</section>
+
+<section id="architecture">
+  <h2>Architecture</h2>
+  <p class="lead">Technical and governance views in one diagram.</p>
+  <div class="flow"><span class="s">SOC analyst</span><span class="x">&rarr;</span><span class="s">Streamlit website</span><span class="x">&rarr;</span><span class="s">n8n orchestrator</span><span class="x">&rarr;</span><span class="s">Five agents</span><span class="x">&rarr;</span><span class="s">Ollama models + FastAPI/SQLite data</span><span class="x">&rarr;</span><span class="s">Code checks</span><span class="x">&rarr;</span><span class="s">Human decision + audit log</span></div>
+  <figure>
+    <div class="scroll"><img src="img/architecture.jpg" alt="Technical and governance architecture diagram" style="min-width:1100px"></div>
+    <figcaption>Architecture. <a href="img/architecture.jpg" target="_blank" rel="noopener">Open full size</a>.</figcaption>
+  </figure>
+  <p>The n8n workflow only decides the order of the steps. The rules, the data and the checks live in tested Python services, which keeps the workflow readable and the logic testable.</p>
+</section>
+
+<section id="governance">
+  <h2>Governance and guardrails</h2>
+  <p class="lead">19 controls (G1 to G19), mapped to the NIST AI Risk Management Framework, with ISO/IEC 27001 Annex A and the OWASP Top 10 for LLM Applications as supporting references.</p>
+  <div class="grid g3">
+    <div class="card acc"><h4>Input</h4><ul class="tight"><li>G1 Mask sensitive fields before any model call</li><li>G2 Validate alert schema and size</li><li>G3 Scan log text for prompt injection; treat it as data</li></ul></div>
+    <div class="card acc"><h4>Model and agent</h4><ul class="tight"><li>G4 Narrow, single-purpose agents</li><li>G5 Evidence-only answers; unknowns stated</li><li>G6 Local open models; fixed settings; synthetic data</li></ul></div>
+    <div class="card acc"><h4>Output</h4><ul class="tight"><li>G7 Rule-based score floor</li><li>G8 Code checks: schema, cited IDs, allowed actions</li><li>G9 Three-run agreement</li><li>G10 Retry once, then escalate</li></ul></div>
+    <div class="card acc"><h4>Decision</h4><ul class="tight"><li>G11 Propose-only actions</li><li>G12 Escalation rules</li><li>G13 Never-deprioritise rules</li><li>G14 Human approval with a reason</li></ul></div>
+    <div class="card acc"><h4>Oversight</h4><ul class="tight"><li>G15 Spot-check before bulk action</li><li>G16 Nothing closed silently</li><li>G17 Reportability flag; reporting stays human</li><li>G18 Audit trail</li><li>G19 Evaluation</li></ul></div>
+    <div class="card warn"><h4>The idea behind them</h4><p>Prompts guide behaviour, but code enforces what must never fail. The governance does not assume the model will always behave correctly; it puts controls around model failure.</p></div>
+  </div>
+  <h3>When the model fails</h3>
+  <div class="grid g4">
+    <div class="card"><h4>Invalid output or invented ID</h4><p>Retry once, then escalate to a person</p></div>
+    <div class="card"><h4>Three runs disagree</h4><p>Escalate</p></div>
+    <div class="card"><h4>Injection text in a log</h4><p>Flag and escalate; never followed</p></div>
+    <div class="card"><h4>A lookup source is down</h4><p>Shown as unknown; never deprioritised</p></div>
+  </div>
+</section>
+
+<section id="prototype">
+  <h2>The working prototype</h2>
+  <p class="lead">A Streamlit website with eight pages (Intake, Analyst queue, Escalations, Deprioritised list, Analytics, Cost-benefit, Case register, Audit trail), an n8n workflow, local models and a small service layer. 74 automated tests and a 27-check automated site test pass.</p>
+  <div class="grid g2">
+    <figure><img src="img/ui_intake.jpg" alt="Intake page with live trace"><figcaption>Intake: choose a sample alert and a model; the live trace shows each agent step as it runs.</figcaption></figure>
+    <figure><img src="img/ui_case_a.jpg" alt="Case screen with warnings, alert and recommendation"><figcaption>Case screen: flags, the alert and a recommendation that is only a proposal.</figcaption></figure>
+    <figure><img src="img/ui_case_b.jpg" alt="Rule-based score table and evidence-linked summary"><figcaption>The score, factor by factor, and a summary linked to evidence.</figcaption></figure>
+    <figure><img src="img/ui_case_c.jpg" alt="Agent trace, audit trail and decision form"><figcaption>Agent trace and the decision form, which requires a reason.</figcaption></figure>
+    <figure><img src="img/ui_deprioritised.jpg" alt="Deprioritised list with reasons"><figcaption>Deprioritised list: saved with reasons, never closed silently.</figcaption></figure>
+    <figure><img src="img/ui_audit.jpg" alt="Append-only audit trail"><figcaption>The append-only audit trail.</figcaption></figure>
+    <figure><img src="img/ui_register.jpg" alt="Case register with search"><figcaption>Case register: every alert received, searchable without case sensitivity (1, g01, AL-G01, a host, a model).</figcaption></figure>
+    <figure><img src="img/ui_E01.jpg" alt="Slow-pattern case E01"><figcaption>Rules v1.2: the slow-pattern warning on a single failed login that follows seven spaced attempts.</figcaption></figure>
+    <figure><img src="img/ui_E02.jpg" alt="Repeated-pattern case E02"><figcaption>Rules v1.2: a repeated pattern on a privileged account escalates the case.</figcaption></figure>
+    <figure><img src="img/ui_costbenefit.jpg" alt="Cost-benefit page"><figcaption>Cost-benefit page at one minute saved per alert: the net turns negative. Every input is an assumption.</figcaption></figure>
+    <figure><img src="img/n8n_masking.jpg" alt="n8n masking output"><figcaption>n8n: the masked case uses HOST-01 and USER-01, which is what the models receive.</figcaption></figure>
+  </div>
+  <h3>The n8n workflows</h3>
+  <figure><div class="scroll"><img src="img/n8n_orchestrator.jpg" alt="n8n orchestrator workflow"></div><figcaption>Orchestrator workflow, drawn from the exported workflow definition: receive, mask and score, five agents, routing, wait for the human decision.</figcaption></figure>
+  <figure><div class="scroll"><img src="img/n8n_run_agent.jpg" alt="n8n run-agent workflow with retry"></div><figcaption>Run-agent workflow: build the request, call the model, validate, record, retry once.</figcaption></figure>
+</section>
+
+<section id="evaluation">
+  <h2>Evaluation of three open models</h2>
+  <p class="lead">20 gold cases with expected answers written before any run, three models, identical prompts, settings and code checks: 60 complete runs.</p>
+  <div class="tw"><table>
+    <tr><th>Measure</th><th>Llama 3.1 8B</th><th>Qwen3 8B</th><th>Mistral 7B</th></tr>
+    <tr><td>Cases routed as expected (of 20)</td><td>12</td><td>17</td><td>15</td></tr>
+    <tr><td>Missed escalations</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>False escalations</td><td>8</td><td>3</td><td>3</td></tr>
+    <tr><td>Band exactly as expected</td><td>75%</td><td>95%</td><td>70%</td></tr>
+    <tr><td>Band never below expected</td><td>100%</td><td>100%</td><td>100%</td></tr>
+    <tr><td>Invented evidence IDs on first try (steps)</td><td>1</td><td>0</td><td>10</td></tr>
+    <tr><td>Three risk runs agree (same band and action class)</td><td>70%</td><td>100%</td><td>85%</td></tr>
+    <tr><td>Median time per case</td><td>55 s</td><td>88 s</td><td>85 s</td></tr>
+  </table></div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card ok"><h4>Safety held</h4><p>No model missed a required escalation, and the injection case was escalated by all three through the code scan.</p></div>
+    <div class="card acc"><h4>Cautious failures</h4><p>Extra escalations mostly came from the safety net (checks failing twice, runs disagreeing), which is the safe direction.</p></div>
+    <div class="card warn"><h4>Read with care</h4><p>One run per case, 20 cases written by the team, on a laptop with a 6 GB GPU. The gap between Qwen and Mistral is two cases and is not a ranking.</p></div>
+  </div>
+  <h3>Prompt engineering finding</h3>
+  <p>Using the STOIC framework (Source, Target, Operator, Intent, Constraints), five prompt versions scored 13, 16, 16, 21 and 25 out of 30 on our own checklist. Added context alone made a small model invent a statistic in every row; constraints removed that, but a limit was still broken. That is why the critical controls are in code and not in the prompts.</p>
+</section>
+
+<section id="expert">
+  <h2>Expert interview</h2>
+  <p class="lead">4 October 2026, with an industry expert in cybersecurity, IT audit, technology risk and governance at an international bank.</p>
+  <p>The team presented the problem, the AS-IS and TO-BE models, the architecture, the governance design and the prototype's limits, demonstrated the prototype, and asked the five standard questions on complexity, dependencies, speed, information, and ambiguous or high-risk cases. The expert suggested no change to the process models, the architecture or the guardrails, and said in closing that the work was very close to what is used in industry day to day.</p>
+  <div class="grid g3">
+    <div class="card ok"><h4>Confirmed</h4><ul class="tight"><li>Fragmented logs are the first difficulty</li><li>Tier 1 cannot isolate without procedure and escalation, so recommend-only fits</li><li>Privileged accounts are the main grey area</li><li>Regulator deadlines vary, so reporting stays human</li></ul></div>
+    <div class="card acc"><h4>Corrected</h4><ul class="tight"><li>Playbooks are often outdated</li><li>Legacy on-premises systems often lack APIs, so integration is hard</li></ul></div>
+    <div class="card warn"><h4>New gaps for us</h4><ul class="tight"><li>Slow, spaced-out attacks evade a ten-minute window</li><li>Patterns over weeks on privileged and critical accounts</li><li>A cost-benefit case against existing SOAR and SIEM tools</li></ul></div>
+  </div>
+  <p class="note" style="margin-top:12px">One expert in one session; the validation is qualitative.</p>
+</section>
+
+
+<section id="after">
+  <h2>What we changed after the interview</h2>
+  <p class="lead">Two gaps were small enough to close in the prototype (rules version 1.2). The others are called out.</p>
+  <div class="grid g2">
+    <div class="card ok"><h4>Slow, spaced-out attempts</h4><p>A 24-hour look-back counts failed logins from one external address: six or more, with fewer than five in the ten-minute window, add points and block deprioritisation. Test case E01: a single failed login that scored 10 and would have gone on the deprioritised list now scores 25 and goes to an analyst.</p></div>
+    <div class="card ok"><h4>Repeated pattern over weeks</h4><p>A synthetic history of earlier alerts is checked for privileged users and critical assets: three or more similar alerts in 60 days add points and escalate the case. Test case E02: a routine-looking failed login by an administrator account is now escalated.</p></div>
+    <div class="card acc"><h4>Rule-based versus model output</h4><p>Every case screen labels what is deterministic (the rule score) and what is probabilistic (the model's recommendation, which is bounded, run three times, and escalated on disagreement).</p></div>
+    <div class="card acc"><h4>Cost-benefit page</h4><p>An in-app page lets anyone change the assumptions (alerts per day, minutes saved, unnecessary escalations, running cost) and see the net effect and the break-even. Every input is an assumption, not a measurement.</p></div>
+  </div>
+  <h3>Illustrative cost-benefit (analyst-hours per day, assumptions stated)</h3>
+  <div class="tw"><table>
+    <tr><th>Scenario</th><th>Minutes saved per alert (assumed)</th><th>Gross saved</th><th>Unnecessary escalations</th><th>Running cost</th><th>Net</th></tr>
+    <tr><td>Pessimistic</td><td>1</td><td>3.3</td><td>2.5</td><td>1.5</td><td>-0.7</td></tr>
+    <tr><td>Base</td><td>2</td><td>6.7</td><td>2.5</td><td>1.5</td><td>2.7</td></tr>
+    <tr><td>Optimistic</td><td>5</td><td>16.7</td><td>2.5</td><td>1.5</td><td>12.7</td></tr>
+  </table></div>
+  <p class="note">Assumptions: 200 alerts a day; 15% unnecessary escalations (3 of 20 for the best model on our difficult test set); 5 extra analyst minutes for each; running cost equal to 1.5 analyst-hours a day. Break-even: 1.2 minutes saved per alert. A pilot with real analysts must replace these assumptions with measurements.</p>
+  <h3>How it differs from SIEM and SOAR</h3>
+  <div class="tw"><table>
+    <tr><th></th><th>SIEM</th><th>SOAR playbooks</th><th>Commercial AI SOC agents</th><th>This prototype</th></tr>
+    <tr><td>Ambiguous alerts</td><td>Little judgement</td><td>Rigid; follows the script</td><td>Model judgement, logic often opaque</td><td>Model interprets under a rule floor and code checks</td></tr>
+    <tr><td>Who decides</td><td>Analyst</td><td>Script may act</td><td>Varies; vendor claims</td><td>Recommend only; a person decides with a reason</td></tr>
+    <tr><td>Explanation</td><td>Rule or query logic</td><td>Visible playbook steps</td><td>Often opaque</td><td>Score table, evidence-linked findings, agent trace</td></tr>
+    <tr><td>Cost and openness</td><td>Licence</td><td>Licence or open source</td><td>Closed, vendor-locked</td><td>Open models, no licence; hardware and upkeep</td></tr>
+  </table></div>
+  <p class="note">A conceptual comparison from public descriptions, not a benchmark. The orchestration layer could be a SOAR platform with the governed agent steps running inside it.</p>
+  <h3>Called out as too large for a prototype</h3>
+  <ul class="tight"><li>Legacy and on-premises systems without APIs (a log-forwarding path would be needed)</li><li>Outdated playbooks (the prototype has none)</li><li>Cloud service accounts and short-lived containers (no telemetry in the synthetic data)</li><li>A measured cost-benefit case and a real tool comparison (need a pilot)</li></ul>
+</section>
+
+<section id="limits">
+  <h2>Limits and what comes next</h2>
+  <p class="lead">This is a governed prototype and a design pattern. It makes no claim of production readiness.</p>
+  <div class="grid g2">
+    <div class="card"><h4>The prototype</h4><ul class="tight"><li>Synthetic data and mock services, not a real SIEM, EDR, inventory or intelligence feed</li><li>Tier 1 only; recommend-only</li><li>Three 7 to 8B models on one laptop; 20 team-written cases, one run each</li><li>One machine, no login; roles separated by page</li></ul></div>
+    <div class="card"><h4>Production would need</h4><ul class="tight"><li>Real integrations and calibration on real alert history</li><li>Authentication, role-based access, a tamper-evident audit log</li><li>Longer-horizon pattern analysis and a cost-benefit pilot beside analysts</li><li>A larger independent evaluation and a formal red-team of the injection defences</li></ul></div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>Demonstration and links</h2>
+  <div class="todo">
+    <h4 style="margin:0 0 6px">Demonstration video</h4>
+    <p style="margin:0">[To be added: embed or link the recorded demonstration here before submission.]</p>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card"><h4>Code and repository</h4><p><a href="https://github.com/karthikM-D/AIB_Agent" target="_blank" rel="noopener">github.com/karthikM-D/AIB_Agent</a></p></div>
+    <div class="card"><h4>Chapter report</h4><p>[To be added: link to the submitted report.]</p></div>
+    <div class="card"><h4>Contact</h4><p>[To be added: corresponding student email.]</p></div>
+  </div>
+</section>
+
+<section id="team">
+  <h2>The team</h2>
+  <p class="lead">Group 6, MBA (IT Business Management), Symbiosis Centre for Information Technology, Pune. Faculty mentor: Anshul Saxena, PhD.</p>
+  <div class="grid g4">
+    <div class="card"><h4>Karthik M D</h4></div><div class="card"><h4>Kirat Kaur Bhatia</h4></div><div class="card"><h4>Kunal Chakraborty</h4></div><div class="card"><h4>M Abhishek</h4></div><div class="card"><h4>Madhur Gupta</h4></div>
+  </div>
+</section>
+
+</main>
+<footer><div class="wrap">All data in this project is synthetic. The system recommends and never acts. Prepared for academic assessment; not a commercial product and not production-ready.</div></footer>
+</body>
+</html>
