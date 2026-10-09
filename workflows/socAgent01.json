@@ -1,0 +1,555 @@
+{
+  "id": "socAgent01",
+  "name": "SOC - Run Agent (with retry)",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { attempt: 1, base_seed: s.seed }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "name": "Init",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $('Init').first().json.case_id }}/agent-input",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $('Init').first().json.agent, model: $('Init').first().json.model, seed: $('Init').first().json.seed, outputs: Object.assign({}, $('Init').first().json.outputs, { risk_outputs: $('Init').first().json.risk_outputs }), final: $('Init').first().json.final }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000003",
+      "name": "Build Request 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:11434/api/chat",
+        "options": {
+          "timeout": 300000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.ollama_body) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000004",
+      "name": "Ollama 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inp = $('Build Request 1').first().json;\nconst r = $input.first().json;\nlet output = null, error = null;\nif (r.error) { error = 'ollama_error: ' + String(r.error.message || JSON.stringify(r.error)).slice(0, 200); }\nelse { try { output = JSON.parse(r.message.content); } catch (e) { error = 'invalid_json: ' + String(e).slice(0, 100); } }\nreturn [{ json: { output, error, latency_ms: r.total_duration ? Math.round(r.total_duration / 1e6) : 0, tokens: r.eval_count || 0,\n  seed: inp.seed, model: inp.model, prompt_version: inp.prompt_version } }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000005",
+      "name": "Parse 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $('Init').first().json.case_id }}/checks",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $('Init').first().json.agent, output: $json.output || {} }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000006",
+      "name": "Check 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $('Parse 1').first().json, c = $input.first().json;\nconst problems = (p.error ? [p.error] : []).concat(c.problems || []);\nreturn [{ json: Object.assign({}, p, { passed: !p.error && c.passed === true, problems }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000007",
+      "name": "Verdict 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $('Init').first().json.case_id }}/steps",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $('Init').first().json.agent, attempt: 1, model: $json.model, prompt_version: $json.prompt_version, output: $json.output || {}, problems: $json.problems, latency_ms: $json.latency_ms }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000008",
+      "name": "Record 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0nd-0000-4000-8000-000000000009",
+              "leftValue": "={{ $('Verdict 1').first().json.passed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000009",
+      "name": "Passed 1?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function merge(ctx, output, failed) {\n  const s = Object.assign({}, ctx);\n  delete s.attempt; delete s.base_seed;\n  s.outputs = Object.assign({}, ctx.outputs);\n  s.failed_checks = Math.max(ctx.failed_checks || 0, failed);\n  if (ctx.agent === 'risk') { s.risk_outputs = (ctx.risk_outputs || []).concat(output ? [output] : []); }\n  else { s.outputs[ctx.agent] = output; }\n  return s;\n}\n\nconst ctx = $('Init').first().json; const v = $('Verdict 1').first().json;\nreturn [{ json: merge(ctx, v.output, 0) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000010",
+      "name": "Done 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $('Init').first().json.case_id }}/agent-input",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $('Init').first().json.agent, model: $('Init').first().json.model, seed: $('Init').first().json.seed + 1000, outputs: Object.assign({}, $('Init').first().json.outputs, { risk_outputs: $('Init').first().json.risk_outputs }), final: $('Init').first().json.final }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000011",
+      "name": "Build Request 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:11434/api/chat",
+        "options": {
+          "timeout": 300000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.ollama_body) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000012",
+      "name": "Ollama 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2560,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inp = $('Build Request 2').first().json;\nconst r = $input.first().json;\nlet output = null, error = null;\nif (r.error) { error = 'ollama_error: ' + String(r.error.message || JSON.stringify(r.error)).slice(0, 200); }\nelse { try { output = JSON.parse(r.message.content); } catch (e) { error = 'invalid_json: ' + String(e).slice(0, 100); } }\nreturn [{ json: { output, error, latency_ms: r.total_duration ? Math.round(r.total_duration / 1e6) : 0, tokens: r.eval_count || 0,\n  seed: inp.seed, model: inp.model, prompt_version: inp.prompt_version } }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000013",
+      "name": "Parse 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2780,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $('Init').first().json.case_id }}/checks",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $('Init').first().json.agent, output: $json.output || {} }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000014",
+      "name": "Check 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $('Parse 2').first().json, c = $input.first().json;\nconst problems = (p.error ? [p.error] : []).concat(c.problems || []);\nreturn [{ json: Object.assign({}, p, { passed: !p.error && c.passed === true, problems }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000015",
+      "name": "Verdict 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $('Init').first().json.case_id }}/steps",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $('Init').first().json.agent, attempt: 2, model: $json.model, prompt_version: $json.prompt_version, output: $json.output || {}, problems: $json.problems, latency_ms: $json.latency_ms }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000016",
+      "name": "Record 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0nd-0000-4000-8000-000000000017",
+              "leftValue": "={{ $('Verdict 2').first().json.passed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000017",
+      "name": "Passed 2?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function merge(ctx, output, failed) {\n  const s = Object.assign({}, ctx);\n  delete s.attempt; delete s.base_seed;\n  s.outputs = Object.assign({}, ctx.outputs);\n  s.failed_checks = Math.max(ctx.failed_checks || 0, failed);\n  if (ctx.agent === 'risk') { s.risk_outputs = (ctx.risk_outputs || []).concat(output ? [output] : []); }\n  else { s.outputs[ctx.agent] = output; }\n  return s;\n}\n\nconst ctx = $('Init').first().json; const v = $('Verdict 2').first().json;\nreturn [{ json: merge(ctx, v.output, 1) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000018",
+      "name": "Done 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3880,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function merge(ctx, output, failed) {\n  const s = Object.assign({}, ctx);\n  delete s.attempt; delete s.base_seed;\n  s.outputs = Object.assign({}, ctx.outputs);\n  s.failed_checks = Math.max(ctx.failed_checks || 0, failed);\n  if (ctx.agent === 'risk') { s.risk_outputs = (ctx.risk_outputs || []).concat(output ? [output] : []); }\n  else { s.outputs[ctx.agent] = output; }\n  return s;\n}\n\nconst ctx = $('Init').first().json;\nreturn [{ json: merge(ctx, null, 2) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000019",
+      "name": "Done Failed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3880,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init": {
+      "main": [
+        [
+          {
+            "node": "Build Request 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Request 1": {
+      "main": [
+        [
+          {
+            "node": "Ollama 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama 1": {
+      "main": [
+        [
+          {
+            "node": "Parse 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse 1": {
+      "main": [
+        [
+          {
+            "node": "Check 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 1": {
+      "main": [
+        [
+          {
+            "node": "Verdict 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verdict 1": {
+      "main": [
+        [
+          {
+            "node": "Record 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record 1": {
+      "main": [
+        [
+          {
+            "node": "Passed 1?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Passed 1?": {
+      "main": [
+        [
+          {
+            "node": "Done 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Request 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Request 2": {
+      "main": [
+        [
+          {
+            "node": "Ollama 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama 2": {
+      "main": [
+        [
+          {
+            "node": "Parse 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse 2": {
+      "main": [
+        [
+          {
+            "node": "Check 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 2": {
+      "main": [
+        [
+          {
+            "node": "Verdict 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verdict 2": {
+      "main": [
+        [
+          {
+            "node": "Record 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record 2": {
+      "main": [
+        [
+          {
+            "node": "Passed 2?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Passed 2?": {
+      "main": [
+        [
+          {
+            "node": "Done 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "socErr01"
+  },
+  "versionId": "e5f6a7b8-0000-4000-8000-000000000001",
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

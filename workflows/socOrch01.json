@@ -1,0 +1,820 @@
+{
+  "id": "socOrch01",
+  "name": "SOC Triage Orchestrator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "soc-triage",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "name": "Webhook: Alert Intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "w3bh00k0-0000-4000-8000-000000000001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || {};\nreturn [{ json: { alert: b.alert || b, model: b.model || 'llama' } }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "name": "Parse Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/alerts",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.alert) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000003",
+      "name": "Intake (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ case_id: $json.case_id, duplicate: $json.duplicate, status: 'accepted' }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000004",
+      "name": "Respond: Case ID",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0nd-0000-4000-8000-000000000005",
+              "leftValue": "={{ $json.duplicate }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000005",
+      "name": "New Alert?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $json.case_id }}/prepare",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000006",
+      "name": "Mask and Score (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { case_id: $('Intake (API)').first().json.case_id, model: $('Parse Request').first().json.model,\n  outputs: {}, risk_outputs: [], failed_checks: 0, final: null } }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000007",
+      "name": "Init State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'correlation', seed: 42 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000008",
+      "name": "Set: correlation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000009",
+      "name": "Run Agent: correlation",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'intel', seed: 42 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000010",
+      "name": "Set: intel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000011",
+      "name": "Run Agent: intel",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'asset', seed: 42 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000012",
+      "name": "Set: asset",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000013",
+      "name": "Run Agent: asset",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2640,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'risk', seed: 42 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000014",
+      "name": "Set: risk 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000015",
+      "name": "Run Agent: risk 1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'risk', seed: 142 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000016",
+      "name": "Set: risk 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000017",
+      "name": "Run Agent: risk 2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'risk', seed: 242 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000018",
+      "name": "Set: risk 3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000019",
+      "name": "Run Agent: risk 3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nif ((s.risk_outputs || []).length < 2) { s.failed_checks = Math.max(s.failed_checks, 2); }\nreturn [{ json: s }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000020",
+      "name": "Before Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $json.case_id }}/route",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ risk_outputs: $json.risk_outputs, failed_checks: $json.failed_checks }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000021",
+      "name": "Route (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $('Before Route').first().json;\nreturn [{ json: Object.assign({}, s, { final: $input.first().json }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000022",
+      "name": "State + Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4620,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json;\nreturn [{ json: Object.assign({}, s, { agent: 'summary', seed: 42 }) }];"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000023",
+      "name": "Set: summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4840,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "socAgent01",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000024",
+      "name": "Run Agent: summary",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        5060,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0nd-0000-4000-8000-000000000025",
+              "leftValue": "={{ $json.final.route === 'deprioritised_list' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000025",
+      "name": "On Deprioritised List?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5280,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0000-4000-8000-000000000026",
+      "name": "Done: Saved on List",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/cases/{{ $json.case_id }}/awaiting",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ resume_url: $execution.resumeUrl }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000027",
+      "name": "Register Resume URL (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5500,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000028",
+      "name": "Wait: Human Decision",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5720,
+        400
+      ],
+      "webhookId": "w3bh00k0-0000-4000-8000-000000000002"
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0000-4000-8000-000000000029",
+      "name": "Done: Decision Received",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5940,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook: Alert Intake": {
+      "main": [
+        [
+          {
+            "node": "Parse Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Request": {
+      "main": [
+        [
+          {
+            "node": "Intake (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intake (API)": {
+      "main": [
+        [
+          {
+            "node": "Respond: Case ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: Case ID": {
+      "main": [
+        [
+          {
+            "node": "New Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Alert?": {
+      "main": [
+        [
+          {
+            "node": "Mask and Score (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mask and Score (API)": {
+      "main": [
+        [
+          {
+            "node": "Init State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init State": {
+      "main": [
+        [
+          {
+            "node": "Set: correlation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: correlation": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: correlation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: correlation": {
+      "main": [
+        [
+          {
+            "node": "Set: intel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: intel": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: intel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: intel": {
+      "main": [
+        [
+          {
+            "node": "Set: asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: asset": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: asset": {
+      "main": [
+        [
+          {
+            "node": "Set: risk 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: risk 1": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: risk 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: risk 1": {
+      "main": [
+        [
+          {
+            "node": "Set: risk 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: risk 2": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: risk 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: risk 2": {
+      "main": [
+        [
+          {
+            "node": "Set: risk 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: risk 3": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: risk 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Before Route": {
+      "main": [
+        [
+          {
+            "node": "Route (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route (API)": {
+      "main": [
+        [
+          {
+            "node": "State + Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "State + Route": {
+      "main": [
+        [
+          {
+            "node": "Set: summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: summary": {
+      "main": [
+        [
+          {
+            "node": "Run Agent: summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: summary": {
+      "main": [
+        [
+          {
+            "node": "On Deprioritised List?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent: risk 3": {
+      "main": [
+        [
+          {
+            "node": "Before Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Deprioritised List?": {
+      "main": [
+        [
+          {
+            "node": "Done: Saved on List",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Register Resume URL (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register Resume URL (API)": {
+      "main": [
+        [
+          {
+            "node": "Wait: Human Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait: Human Decision": {
+      "main": [
+        [
+          {
+            "node": "Done: Decision Received",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "socErr01"
+  },
+  "versionId": "e5f6a7b8-0000-4000-8000-000000000001",
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

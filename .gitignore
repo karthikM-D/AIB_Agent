@@ -1,0 +1,14 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+n8n/data/
+n8n/node_modules/
+data/*.db
+data/*.db-wal
+data/*.db-shm
+.pytest_cache/
+.pytest_tmp/
+logs/
+benchmark/results/
+benchmark/summary/

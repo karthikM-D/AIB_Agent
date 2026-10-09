@@ -1,0 +1,55 @@
+{
+  "203.0.113.57": {
+    "reputation": "malicious",
+    "score": 92,
+    "reports": 140,
+    "tags": [
+      "brute-force",
+      "ssh-scanner"
+    ]
+  },
+  "203.0.113.99": {
+    "reputation": "suspicious",
+    "score": 55,
+    "reports": 12,
+    "tags": [
+      "scanner"
+    ]
+  },
+  "198.51.100.23": {
+    "reputation": "malicious",
+    "score": 88,
+    "reports": 61,
+    "tags": [
+      "command-and-control"
+    ]
+  },
+  "198.51.100.77": {
+    "reputation": "clean",
+    "score": 4,
+    "reports": 0,
+    "tags": []
+  },
+  "192.0.2.10": {
+    "reputation": "unknown",
+    "score": null,
+    "reports": 0,
+    "tags": []
+  },
+  "evil-update.example": {
+    "reputation": "malicious",
+    "score": 95,
+    "reports": 210,
+    "tags": [
+      "malware-distribution"
+    ]
+  },
+  "9f2c5a7e1b3d4c6a8e0f1a2b3c4d5e6f": {
+    "reputation": "suspicious",
+    "score": 60,
+    "reports": 9,
+    "tags": [
+      "dropper"
+    ]
+  }
+}

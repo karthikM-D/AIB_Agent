@@ -1,0 +1,31 @@
+[
+  {
+    "case_id": "E01",
+    "category": "slow_attack",
+    "description": "Seven failed logins over 15 hours from one external address; only one in the ten-minute window",
+    "expected": {
+      "band": "medium",
+      "escalate": false,
+      "deprioritise_allowed": false,
+      "features": [
+        "slow_failed_logins"
+      ],
+      "rules_v1_1_would_give": "band low, deprioritised list"
+    }
+  },
+  {
+    "case_id": "E02",
+    "category": "repeat_pattern",
+    "description": "One failed login by a privileged user who had the same alert four times in the last two months",
+    "expected": {
+      "band": "medium",
+      "escalate": true,
+      "deprioritise_allowed": false,
+      "features": [
+        "repeat_pattern",
+        "privileged_user"
+      ],
+      "rules_v1_1_would_give": "band low, analyst queue"
+    }
+  }
+]

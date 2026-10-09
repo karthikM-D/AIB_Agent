@@ -1,0 +1,110 @@
+{
+  "id": "socClose01",
+  "name": "SOC Auto-close Saved Alerts (daily)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "name": "Schedule: Daily 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        150
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/admin/autoclose",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000003",
+      "name": "Auto-close After N Days (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        250
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0000-4000-8000-000000000004",
+      "name": "Notice to SOC Lead Recorded",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        520,
+        250
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule: Daily 06:00": {
+      "main": [
+        [
+          {
+            "node": "Auto-close After N Days (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Auto-close After N Days (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-close After N Days (API)": {
+      "main": [
+        [
+          {
+            "node": "Notice to SOC Lead Recorded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "socErr01"
+  },
+  "versionId": "e5f6a7b8-0000-4000-8000-000000000001",
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

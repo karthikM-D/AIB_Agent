@@ -1,0 +1,128 @@
+{
+  "fin-app-srv-03": {
+    "criticality": "critical",
+    "environment": "production",
+    "data_class": "restricted",
+    "owner": "finance-it",
+    "role": "finance application server"
+  },
+  "hr-db-01": {
+    "criticality": "critical",
+    "environment": "production",
+    "data_class": "restricted",
+    "owner": "hr-it",
+    "role": "HR database"
+  },
+  "web-prod-01": {
+    "criticality": "high",
+    "environment": "production",
+    "data_class": "confidential",
+    "owner": "web-ops",
+    "role": "public web server"
+  },
+  "web-prod-02": {
+    "criticality": "high",
+    "environment": "production",
+    "data_class": "internal",
+    "owner": "web-ops",
+    "role": "public web server"
+  },
+  "mail-gw-01": {
+    "criticality": "high",
+    "environment": "production",
+    "data_class": "internal",
+    "owner": "messaging",
+    "role": "mail gateway"
+  },
+  "vpn-gw-01": {
+    "criticality": "high",
+    "environment": "production",
+    "data_class": "internal",
+    "owner": "network-ops",
+    "role": "VPN gateway"
+  },
+  "backup-srv-02": {
+    "criticality": "high",
+    "environment": "production",
+    "data_class": "confidential",
+    "owner": "infra",
+    "role": "backup server"
+  },
+  "file-srv-02": {
+    "criticality": "medium",
+    "environment": "production",
+    "data_class": "confidential",
+    "owner": "infra",
+    "role": "file server"
+  },
+  "stg-api-01": {
+    "criticality": "high",
+    "environment": "staging",
+    "data_class": "internal",
+    "owner": "app-dev",
+    "role": "staging API"
+  },
+  "dev-build-01": {
+    "criticality": "low",
+    "environment": "development",
+    "data_class": "internal",
+    "owner": "app-dev",
+    "role": "build server"
+  },
+  "test-srv-07": {
+    "criticality": "low",
+    "environment": "test",
+    "data_class": "internal",
+    "owner": "qa",
+    "role": "test server"
+  },
+  "test-srv-08": {
+    "criticality": "low",
+    "environment": "test",
+    "data_class": "internal",
+    "owner": "qa",
+    "role": "test server"
+  },
+  "kiosk-03": {
+    "criticality": "low",
+    "environment": "test",
+    "data_class": "public",
+    "owner": "facilities",
+    "role": "lobby kiosk"
+  },
+  "wks-0107": {
+    "criticality": "low",
+    "environment": "corporate",
+    "data_class": "internal",
+    "owner": "it-desk",
+    "role": "workstation"
+  },
+  "wks-0142": {
+    "criticality": "low",
+    "environment": "corporate",
+    "data_class": "internal",
+    "owner": "it-desk",
+    "role": "workstation"
+  },
+  "wks-0150": {
+    "criticality": "low",
+    "environment": "corporate",
+    "data_class": "internal",
+    "owner": "it-desk",
+    "role": "workstation"
+  },
+  "ext-web-04": {
+    "criticality": "medium",
+    "environment": "production",
+    "data_class": "internal",
+    "owner": "web-ops",
+    "role": "customer portal web server"
+  },
+  "dev-build-02": {
+    "criticality": "low",
+    "environment": "development",
+    "data_class": "internal",
+    "owner": "app-dev",
+    "role": "build server"
+  }
+}

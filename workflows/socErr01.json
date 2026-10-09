@@ -1,0 +1,59 @@
+{
+  "id": "socErr01",
+  "name": "SOC Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8000/workflow-errors",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ execution_id: String($json.execution.id), workflow: $json.workflow.name, node: $json.execution.lastNodeExecuted, message: ($json.execution.error && $json.execution.error.message) || '' }) }}"
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "name": "Escalate Stuck Cases (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Escalate Stuck Cases (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e5f6a7b8-0000-4000-8000-000000000001",
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "j.rao": {
+    "privileged": true,
+    "status": "on_leave",
+    "department": "IT administration"
+  },
+  "r.khan": {
+    "privileged": true,
+    "status": "active",
+    "department": "systems"
+  },
+  "svc-backup": {
+    "privileged": true,
+    "status": "active",
+    "department": "infrastructure (service account)"
+  },
+  "s.iyer": {
+    "privileged": false,
+    "status": "active",
+    "department": "finance"
+  },
+  "t.nair": {
+    "privileged": false,
+    "status": "active",
+    "department": "HR"
+  },
+  "m.verma": {
+    "privileged": false,
+    "status": "terminated",
+    "department": "sales (left 2026-09-12)"
+  },
+  "l.fernandes": {
+    "privileged": false,
+    "status": "active",
+    "department": "sales"
+  },
+  "a.menon": {
+    "privileged": false,
+    "status": "active",
+    "department": "SOC"
+  },
+  "d.shah": {
+    "privileged": false,
+    "status": "active",
+    "department": "contractor"
+  }
+}

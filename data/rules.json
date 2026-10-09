@@ -1,0 +1,100 @@
+{
+  "_note": "Proposed by Claude, to be reviewed by the team. Synthetic-data PoC; weights are illustrative, not calibrated to a real SOC.",
+  "version": "rules-v1.2",
+  "window_minutes": 10,
+  "points": {
+    "failed_logins_ge_10": 15,
+    "failed_logins_ge_5": 8,
+    "success_after_failures": 20,
+    "intel_malicious": 25,
+    "intel_suspicious": 12,
+    "asset_critical": 20,
+    "asset_high": 12,
+    "asset_medium": 5,
+    "asset_unknown_or_unavailable": 5,
+    "privileged_user": 15,
+    "inactive_user": 15,
+    "privilege_escalation": 15,
+    "data_exfiltration": 25,
+    "malware_detected": 20,
+    "production_environment": 5,
+    "slow_failed_logins": 15,
+    "repeat_pattern": 15
+  },
+  "success_after_failures_min_failures": 3,
+  "score_cap": 100,
+  "bands": {
+    "low": 0,
+    "medium": 25,
+    "high": 50,
+    "critical": 75
+  },
+  "compromise_indicators": [
+    "success_after_failures",
+    "privilege_escalation",
+    "data_exfiltration",
+    "malware_detected",
+    "inactive_user_login"
+  ],
+  "reportable_any_production": [
+    "data_exfiltration",
+    "inactive_user_login"
+  ],
+  "reportable_requires": {
+    "environment": "production",
+    "criticality_in": [
+      "critical"
+    ],
+    "data_class_in": [
+      "confidential",
+      "restricted"
+    ]
+  },
+  "never_deprioritise": [
+    "critical_asset",
+    "intel_hit",
+    "privileged_user",
+    "possibly_reportable",
+    "injection_suspected",
+    "tool_or_data_gap",
+    "run_disagreement",
+    "slow_pattern",
+    "repeat_pattern"
+  ],
+  "escalate_if": [
+    "band_high_or_critical",
+    "possibly_reportable",
+    "injection_suspected",
+    "run_disagreement",
+    "checks_failed_twice",
+    "repeat_pattern"
+  ],
+  "injection_patterns": [
+    "ignore (all )?(the )?(previous|prior|above) instructions",
+    "disregard (all )?(the )?(previous|prior|above)",
+    "close this alert",
+    "mark (this )?(alert )?as (benign|false positive|resolved)",
+    "you are now",
+    "system prompt",
+    "do not (escalate|report|alert)"
+  ],
+  "allowed_actions": [
+    "request_owner_confirmation",
+    "propose_account_disable",
+    "propose_host_isolation",
+    "propose_ip_block",
+    "propose_credential_reset",
+    "propose_password_reset",
+    "add_to_watchlist",
+    "escalate_to_senior_analyst",
+    "no_action_recommended"
+  ],
+  "retry_limit": 1,
+  "auto_close_days": 7,
+  "queue_age_limit_hours": 24,
+  "slow_window_hours": 24,
+  "slow_min_failures": 6,
+  "history_days": 60,
+  "repeat_min_prior": 3,
+  "_note_v1_2": "v1.2 (after expert feedback): slow_failed_logins looks back slow_window_hours for spaced-out failed logins; repeat_pattern counts prior similar alerts in data/history.json for privileged users or critical assets. Neither feature fires on the 20 gold cases or the 100 background alerts (tested)."
+}
