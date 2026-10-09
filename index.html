@@ -59,7 +59,7 @@ footer{margin-top:56px;background:var(--navy);color:#a9bccd;padding:28px 0;font-
 </div></header>
 
 <nav><div class="wrap">
-  <a href="#overview">Overview</a><a href="#problem">Problem</a><a href="#asis">Today</a><a href="#tobe">Proposal</a><a href="#architecture">Architecture</a><a href="#governance">Governance</a><a href="#prototype">Prototype</a><a href="#evaluation">Evaluation</a><a href="#expert">Expert</a><a href="#after">After the interview</a><a href="#limits">Limits</a><a href="#demo">Demo &amp; links</a><a href="#team">Team</a>
+  <a href="#overview">Overview</a><a href="#problem">Problem</a><a href="#asis">Today</a><a href="#tobe">Proposal</a><a href="#architecture">Architecture</a><a href="#governance">Governance</a><a href="#prototype">Prototype</a><a href="#evaluation">Evaluation</a><a href="#tests">Tests</a><a href="#expert">Expert</a><a href="#after">After the interview</a><a href="#limits">Limits</a><a href="#demo">Demo &amp; links</a><a href="#team">Team</a>
 </div></nav>
 
 <main class="wrap">
@@ -195,6 +195,18 @@ footer{margin-top:56px;background:var(--navy);color:#a9bccd;padding:28px 0;font-
   </div>
   <h3>Prompt engineering finding</h3>
   <p>Using the STOIC framework (Source, Target, Operator, Intent, Constraints), five prompt versions scored 13, 16, 16, 21 and 25 out of 30 on our own checklist. Added context alone made a small model invent a statistic in every row; constraints removed that, but a limit was still broken. That is why the critical controls are in code and not in the prompts.</p>
+</section>
+
+<section id="tests">
+  <h2>Test cases and results</h2>
+  <p class="lead">Seven of the 20 gold cases, chosen to cover the situations in the brief. Each ran once on each of the three models; a case passes for a model only when its route matches the expected route, which was written before the run.</p>
+  <div class="tw"><table><tr><th>Test case</th><th>Input</th><th>Expected behaviour</th><th>Actual behaviour</th><th>Human intervention</th><th>Result</th></tr><tr><td>G01 Normal</td><td>6 failed logins on test-srv-07 from 10.20.1.15</td><td>route: deprioritised; band: low</td><td>Llama 3.1 8B: deprioritised (low); Qwen3 8B: deprioritised (low); Mistral 7B: escalated (medium)</td><td>None until the spot-check of the list</td><td>Partial (2 of 3)</td></tr><tr><td>G06 Exception: asset not in inventory</td><td>12 failed logins on tmp-host-99 from 192.0.2.10</td><td>route: analyst queue; band: low</td><td>Llama 3.1 8B: analyst queue (low); Qwen3 8B: analyst queue (low); Mistral 7B: escalated (medium)</td><td>Analyst decides, with a reason</td><td>Partial (2 of 3)</td></tr><tr><td>G07 Ambiguous: intelligence source times out</td><td>Successful login for s.iyer on file-srv-02 after 3 failures from 192.0.2.10</td><td>route: escalated; band: medium; flag possibly reportable</td><td>Llama 3.1 8B: escalated (high); Qwen3 8B: escalated (medium); Mistral 7B: escalated (medium)</td><td>Senior analyst or lead decides, with a reason</td><td>Pass (3 of 3)</td></tr><tr><td>G09 High risk</td><td>Successful SSH login for j.rao on fin-app-srv-03 at 02:14 after 23 failures from 203.0.113.57</td><td>route: escalated; band: critical; flag possibly reportable</td><td>Llama 3.1 8B: escalated (critical); Qwen3 8B: escalated (critical); Mistral 7B: escalated (critical)</td><td>Senior analyst or lead decides, with a reason</td><td>Pass (3 of 3)</td></tr><tr><td>G13 Injection in log text</td><td>12 failed logins on test-srv-08</td><td>route: escalated; band: low; injection flagged</td><td>Llama 3.1 8B: escalated (low); Qwen3 8B: escalated (low); Mistral 7B: escalated (low)</td><td>Senior analyst or lead decides, with a reason</td><td>Pass (3 of 3)</td></tr><tr><td>G14 Alert storm (25 duplicates)</td><td>25 failed logins on wks-0142 within five minutes</td><td>route: deprioritised; band: low</td><td>Llama 3.1 8B: escalated (low); Qwen3 8B: deprioritised (low); Mistral 7B: deprioritised (low)</td><td>None until the spot-check of the list</td><td>Partial (2 of 3)</td></tr><tr><td>G15 Tool failure: asset lookup down</td><td>12 failed logins on web-prod-02 from 198.51.100.77</td><td>route: analyst queue; band: low</td><td>Llama 3.1 8B: escalated (low); Qwen3 8B: analyst queue (low); Mistral 7B: analyst queue (low)</td><td>Analyst decides, with a reason</td><td>Partial (2 of 3)</td></tr></table></div>
+  <p class="note" style="margin-top:10px">The cases that matter most for safety (G07, G09 and G13) passed on all three models. The differences are in benign and boundary cases, where weaker models were more cautious than necessary, never less. No model missed a required escalation in the 20 cases. Two further cases added after the expert interview (E01 slow attempts, E02 repeated pattern) were routed as expected by all three models. All data is invented. These are constructed cases, not real traffic.</p>
+  <div class="grid g3" style="margin-top:12px">
+    <div class="card ok"><h4>74 automated tests</h4><p>Rules, masking, code checks, services, the case register and its search, and interface safety.</p></div>
+    <div class="card ok"><h4>27 automated site checks</h4><p>Every page renders; empty reasons and unknown decisions are refused; duplicates are recognised; live runs reach the expected routes.</p></div>
+    <div class="card acc"><h4>Live walkthrough</h4><p>On 9 October 2026 five live alerts through n8n matched their expected routes, and the n8n live view ran end to end in 1 minute 43 seconds.</p></div>
+  </div>
 </section>
 
 <section id="expert">
