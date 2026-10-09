@@ -69,6 +69,7 @@ footer{margin-top:56px;background:var(--navy);color:#a9bccd;padding:28px 0;font-
   <p class="lead">What this project is, in one minute.</p>
   <p>In a Security Operations Centre (SOC), Tier 1 analysts spend much of their effort collecting and correlating evidence before they can judge an alert. We asked one question: <strong>how can that manual effort be reduced without giving AI unsafe control over security decisions?</strong></p>
   <p>Our answer is a governed assistant. An alert arrives, sensitive names are masked, a transparent rule score is worked out, and five single-purpose AI agents prepare the case. Ordinary code checks every answer. Rules route the case. A person reads the evidence, decides and must write a reason. Every step goes into an append-only audit log.</p>
+  <div class="note" style="margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;background:var(--card)"><strong>Hosting.</strong> The full live application (agents, local models, n8n, services and website) runs <strong>locally only</strong> on the team's laptop and is shown in the demonstration video. This website is a static, public summary of the project and does not run the system. The source code is in the public repository.</div>
   <div class="grid g3">
     <div class="card acc"><h4>Scope</h4><p>Tier 1 first-pass triage only. Tier 2 investigation appears in the process model but is outside the prototype.</p></div>
     <div class="card acc"><h4>Autonomy</h4><p>The system recommends and never acts. No containment or response tool exists in it.</p></div>
@@ -263,14 +264,16 @@ footer{margin-top:56px;background:var(--navy);color:#a9bccd;padding:28px 0;font-
 
 <section id="demo">
   <h2>Demonstration and links</h2>
-  <div class="todo">
-    <h4 style="margin:0 0 6px">Demonstration video</h4>
-    <p style="margin:0">[To be added: embed or link the recorded demonstration here before submission.]</p>
-  </div>
+  <figure>
+    <video controls preload="metadata" playsinline style="width:100%;border-radius:10px;border:1px solid var(--line);background:#000" src="demo/grp_6_b_demo.mp4">
+      Your browser does not play this video. <a href="demo/grp_6_b_demo.mp4">Open the video file.</a>
+    </video>
+    <figcaption>Demonstration video (Group 6): the slides, the results, and the live system running locally on the team's laptop with three live alerts, including one inside n8n. About 17 minutes.</figcaption>
+  </figure>
   <div class="grid g3" style="margin-top:16px">
     <div class="card"><h4>Code and repository</h4><p><a href="https://github.com/karthikM-D/AIB_Agent" target="_blank" rel="noopener">github.com/karthikM-D/AIB_Agent</a></p></div>
-    <div class="card"><h4>Chapter report</h4><p>[To be added: link to the submitted report.]</p></div>
-    <div class="card"><h4>Contact</h4><p>[To be added: corresponding student email.]</p></div>
+    <div class="card"><h4>Chapter report</h4><p>Submitted through Google Classroom (file grp_6_b). It is not published here.</p></div>
+    <div class="card"><h4>Contact</h4><p><a href="mailto:karthik.m@associates.scit.edu">karthik.m@associates.scit.edu</a></p></div>
   </div>
 </section>
 
